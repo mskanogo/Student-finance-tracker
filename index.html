@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student finance tracker </title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body>
+
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<header>
+   <h1>Student finance tracker </h1>
+</header>
+
+<nav aria-label="Main navigation">
+    <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#dashboard">Dashboard</a></li>
+        <li><a href="#records">Records</a></li>
+        <li><a href="#form">Add Transaction</a></li>
+        <li><a href="#settings">Settings</a></li>
+    </ul>
+</nav>
+
+<main id="main-content">
+    <section id="about" aria-labelledby="about-heading">
+        <h2 id="about-heading">About this app</h2>
+        <p>Track your student expenses, manage your budget, and stay on top of your finances.</p>
+        <div class="contact-links">
+            <a href="https://github.com/mskanogo/student-finance-tracker" target="_blank" rel="noopener"> Github </a> <br>
+            <a href="m.kanogo@alustudent.com"> Email support</a>
+        </div>
+    </section>
+
+    <section id="dashboard" aria-labelledby="dashboard-heading">
+        <h2 id="dashboard-heading">Dashboard</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total transactions</h3>
+                <p id="total-transactions" class="stat-value">$0.00</p>
+            </div>
+            <div class="stat-card"></div>
+                 <h3>Total spent</h3>
+                 <p id="total-spent" class="stat-value">$0.00</p>
+            </div>
+            <div class="stat-card">
+                  <h3>Top category</h3>
+                  <p id="top-category" class="stat-value">-</p>
+            </div>
+        </div>
+        <div class="budget-status" aria-live="polite" id="budget-message">
+            <p>Budget status: <span id="budget-text">Within budget</span></p>
+        </div>
+    </section>
+
+    <section id="records" aria-labelledby="records-heading">
+        <h2 id="records-heading">Transaction records</h2>
+
+        <div class="records-controls">
+
+            <div class="search-box">
+                <label for="search-input">Search transactions:</label>
+                <input type="text" id="search-input" placeholder="Enter search term..." aria-label="Search transactions">
+            </div>
+
+            <div class="sort-controls">
+                <span>Sort by:</span>
+                <button class="sort-btn" data-sort="date">Date</button>
+                <button class="sort-btn" data-sort="description">Description</button>
+                <button class="sort-btn" data-sort="amount">Amount</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table id="transactions-table">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="table-body">
+
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="form" aria-labelledby="form-heading">
+        <h2 id="form-heading">Add New Transaction</h2>
+
+        <form id="transaction-form" novalidate>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <input type="text" id="description" name="description" required minlength="3" maxlength="50">
+                <div class="error-message" id="description-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="amount">Amount ($):</label>
+                <input type="number" id="amount" name="amount" required min="0.01" step="0.01">
+                <div class="error-message" id="amount-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="category" name="category" required>
+                    <option value="">Select a category</option>
+                    <option value="Food">Food</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Books">Books</option>
+                    <option value="Supplies">Supplies</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Other">Other</option>
+                </select>
+                <div class="error-message" id="category-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required>
+                <div class="error-message" id="date-error"></div>
+            </div>
+
+            <button type="submit">Add Transaction</button>
+            <button type="reset">Clear Form</button>
+        </form>
+    </section>
+
+    <section id="settings" aria-labelledby="settings-heading">
+        <h2 id="settings-heading">Settings</h2>
+
+        <div class="settings-group">
+            <h3>Budget Cap</h3>
+            <div class="form-group">
+                <label for="budget-cap">Monthly Budget Cap ($):</label>
+                <input type="number" id="budget-cap" min="0" step="0.01" value="500">
+                <button id="save-cap">Save Cap</button>
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <h3>Import/Export Data</h3>
+            <button id="export-data">Export Data (JSON)</button>
+            <div class="import-group">
+                <label for="import-file">Import Data:</label>
+                <input type="file" id="import-file" accept=".json">
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2026 Student Finance Tracker - A project for learning JavaScript</p>
+</footer>
+
+<script src="scripts/state.js"></script>
+<script src="scripts/storage.js"></script>
+<script src="scripts/validators.js"></script>
+<script src="scripts/search.js"></script>
+<script src="scripts/ui.js"></script>
+<script src="scripts/main.js"></script>
+</body>
+</html>
