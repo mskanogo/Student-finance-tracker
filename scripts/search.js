@@ -1,54 +1,51 @@
-const Search = (function() {
-    function safeRegex(pattern, flags = 'gi') {
-        try {
-            return new RegExp(pattern, flags);
-        } catch (error) {
-            console.log('Invalid regex pattern:', error.message);
-            return null;
-        }
+function escapeHtml(text) {
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function safeRegex(pattern, flags) {
+    try {
+        return new RegExp(pattern, flags);
+    } catch {
+        return null;
     }
+}
 
-    return {
-        searchRecords(records, searchTerm) {
-            if (!searchTerm || searchTerm.trim() === '') {
-                return records;
-            }
-            const regex = safeRegex(searchTerm.trim());
-            if (!regex) {
-                return [];
-            }
-            regex.lastIndex = 0;
-            return records.filter(record => {
-                regex.lastIndex = 0;
-                const descriptionMatch = regex.test(record.description);
-                regex.lastIndex = 0;
-                const categoryMatch = regex.test(record.category);
-                return descriptionMatch || categoryMatch;
-            });
-        },
+export const search = {
 
-        highlightText(text, searchTerm) {
-            if (!searchTerm || searchTerm.trim() === '') {
-                return text;
-            }
-            const regex = safeRegex(searchTerm.trim());
-            if (!regex) {
-                return text;
-            }
-            regex.lastIndex = 0;
-            return text.toString().replace(regex, match => `<span class="highlight">${match}</span>`);
-        },
+    isValidPattern(term) {
+        if (!term || term.trim() === '') return true;
+        return safeRegex(term.trim()) !== null;
+    },
 
-        isValidSearch(searchTerm) {
-            if (!searchTerm || searchTerm.trim() === '') {
-                return true;
-            }
-            try {
-                new RegExp(searchTerm);
-                return true;
-            } catch {
-                return false;
-            }
-        }
-    };
-})();
+    searchRecords(records, searchTerm, caseInsensitive = false) {
+        if (!searchTerm || searchTerm.trim() === '') return records;
+
+        const flags = caseInsensitive ? 'i' : '';
+        const regex = safeRegex(searchTerm.trim(), flags);
+        if (!regex) return [];
+
+        return records.filter(record => {
+            return (
+                regex.test(record.description) ||
+                regex.test(record.category)    ||
+                regex.test(String(record.amount)) ||
+                regex.test(record.date)
+            );
+        });
+    },
+
+    highlightText(text, searchTerm, caseInsensitive = false) {
+        if (!searchTerm || searchTerm.trim() === '') return escapeHtml(text);
+
+        const flags = caseInsensitive ? 'gi' : 'g';
+        const regex = safeRegex(searchTerm.trim(), flags);
+        if (!regex) return escapeHtml(text);
+
+        return escapeHtml(text).replace(regex, match => `<mark>${match}</mark>`);
+    },
+
+};
