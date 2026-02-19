@@ -1,0 +1,147 @@
+{
+  "records": [
+    {
+      "id": "txn_seed001",
+      "description": "Weekly grocery shopping",
+      "amount": 34.50,
+      "category": "Food",
+      "date": "2025-02-03",
+      "createdAt": "2025-02-03T09:14:22Z",
+      "updatedAt": "2025-02-03T09:14:22Z"
+    },
+    {
+      "id": "txn_seed002",
+      "description": "Introduction to Algorithms textbook",
+      "amount": 68.99,
+      "category": "Books",
+      "date": "2025-02-04",
+      "createdAt": "2025-02-04T11:30:00Z",
+      "updatedAt": "2025-02-04T11:30:00Z"
+    },
+    {
+      "id": "txn_seed003",
+      "description": "Monthly bus pass",
+      "amount": 45.00,
+      "category": "Transport",
+      "date": "2025-02-05",
+      "createdAt": "2025-02-05T08:05:10Z",
+      "updatedAt": "2025-02-05T08:05:10Z"
+    },
+    {
+      "id": "txn_seed004",
+      "description": "Cinema ticket with friends",
+      "amount": 12.50,
+      "category": "Entertainment",
+      "date": "2025-02-07",
+      "createdAt": "2025-02-07T19:45:00Z",
+      "updatedAt": "2025-02-07T19:45:00Z"
+    },
+    {
+      "id": "txn_seed005",
+      "description": "University library late fee",
+      "amount": 3.20,
+      "category": "Fees",
+      "date": "2025-02-08",
+      "createdAt": "2025-02-08T14:00:00Z",
+      "updatedAt": "2025-02-08T14:00:00Z"
+    },
+    {
+      "id": "txn_seed006",
+      "description": "Lunch at campus canteen",
+      "amount": 6.75,
+      "category": "Food",
+      "date": "2025-02-10",
+      "createdAt": "2025-02-10T12:30:00Z",
+      "updatedAt": "2025-02-10T12:30:00Z"
+    },
+    {
+      "id": "txn_seed007",
+      "description": "Notebook and stationery pack",
+      "amount": 9.40,
+      "category": "Other",
+      "date": "2025-02-11",
+      "createdAt": "2025-02-11T10:10:00Z",
+      "updatedAt": "2025-02-11T10:10:00Z"
+    },
+    {
+      "id": "txn_seed008",
+      "description": "Uber ride to exam venue",
+      "amount": 14.30,
+      "category": "Transport",
+      "date": "2025-02-12",
+      "createdAt": "2025-02-12T07:50:00Z",
+      "updatedAt": "2025-02-12T07:50:00Z"
+    },
+    {
+      "id": "txn_seed009",
+      "description": "Spotify student subscription",
+      "amount": 5.99,
+      "category": "Entertainment",
+      "date": "2025-02-13",
+      "createdAt": "2025-02-13T00:00:00Z",
+      "updatedAt": "2025-02-13T00:00:00Z"
+    },
+    {
+      "id": "txn_seed010",
+      "description": "Printing dissertation draft",
+      "amount": 7.60,
+      "category": "Fees",
+      "date": "2025-02-14",
+      "createdAt": "2025-02-14T15:20:00Z",
+      "updatedAt": "2025-02-14T15:20:00Z"
+    },
+    {
+      "id": "txn_seed011",
+      "description": "Data Structures course notes",
+      "amount": 22.00,
+      "category": "Books",
+      "date": "2025-02-15",
+      "createdAt": "2025-02-15T09:00:00Z",
+      "updatedAt": "2025-02-15T09:00:00Z"
+    },
+    {
+      "id": "txn_seed012",
+      "description": "Coffee and revision snacks",
+      "amount": 8.15,
+      "category": "Food",
+      "date": "2025-02-16",
+      "createdAt": "2025-02-16T10:45:00Z",
+      "updatedAt": "2025-02-16T10:45:00Z"
+    },
+    {
+      "id": "txn_seed013",
+      "description": "Train home for reading week",
+      "amount": 31.50,
+      "category": "Transport",
+      "date": "2025-02-17",
+      "createdAt": "2025-02-17T16:30:00Z",
+      "updatedAt": "2025-02-17T16:30:00Z"
+    },
+    {
+      "id": "txn_seed014",
+      "description": "Student union quiz night entry",
+      "amount": 4.00,
+      "category": "Entertainment",
+      "date": "2025-02-18",
+      "createdAt": "2025-02-18T20:00:00Z",
+      "updatedAt": "2025-02-18T20:00:00Z"
+    },
+    {
+      "id": "txn_seed015",
+      "description": "Laundry and campus dryer",
+      "amount": 5.50,
+      "category": "Other",
+      "date": "2025-02-19",
+      "createdAt": "2025-02-19T11:00:00Z",
+      "updatedAt": "2025-02-19T11:00:00Z"
+    }
+  ],
+  "settings": {
+    "budgetCap": 500,
+    "baseCurrency": "USD",
+    "currency2": { "code": "EUR", "rate": 0.92 },
+    "currency3": { "code": "KES", "rate": 130 }
+  },
+  "exportedAt": "2025-02-19T12:00:00Z",
+  "version": "1.1"
+}
