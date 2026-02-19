@@ -1,129 +1,150 @@
-const State = (function() {
-    let records = [];
-    let budgetCap = 500;
+const _records = [];
 
-    function generateId() {
-        const timestamp = Date.now().toString(36);
-        const random = Math.random().toString(36).substring(2);
-        return timestamp + random;
-    }
+let _editingId = null;
 
-    function isValidRecord(record) {
-        return (
-            record &&
-            typeof record.description === 'string' &&
-            typeof record.amount === 'number' &&
-            typeof record.category === 'string' &&
-            typeof record.date === 'string'
-        );
-    }
+let _settings = {
+    budgetCap:     500,
+    baseCurrency:  'USD',
+    currency2:     { code: 'EUR', rate: 0.92 },
+    currency3:     { code: 'KES', rate: 130 },
+};
 
-    return {
-        getRecords() {
-            return [...records];
-        },
+function generateId() {
+    return 'txn_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
 
-        getRecordById(id) {
-            return records.find(record => record.id === id);
-        },
+function deepCopyRecord(record) {
+    return { ...record };
+}
 
-        getBudgetCap() {
-            return budgetCap;
-        },
+export const state = {
 
-        setRecords(newRecords) {
-            if (Array.isArray(newRecords)) {
-                records = [...newRecords];
-            } else {
-                console.error('setRecords: expected array, got', typeof newRecords);
-                records = [];
-            }
-        },
+    getRecords() {
+        return _records.map(deepCopyRecord);
+    },
 
-        setBudgetCap(cap) {
-            const parsedCap = Number(cap);
-            if (!isNaN(parsedCap) && parsedCap >= 0) {
-                budgetCap = parsedCap;
-            }
-        },
+    setRecords(incoming) {
+        if (!Array.isArray(incoming)) return;
+        _records.length = 0;
+        incoming.forEach(r => _records.push(deepCopyRecord(r)));
+    },
 
-        addRecord(recordData) {
-            const newRecord = {
-                ...recordData,
-                amount: Number(recordData.amount),
-                id: generateId(),
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-            if (!isValidRecord(newRecord)) {
-                console.error('addRecord: invalid record data', recordData);
-                return null;
-            }
-            records.push(newRecord);
-            return newRecord;
-        },
-
-        updateRecord(id, updates) {
-            const index = records.findIndex(r => r.id === id);
-            if (index === -1) {
-                console.warn(`updateRecord: record with id ${id} not found`);
-                return null;
-            }
-            const existingRecord = records[index];
-            const updatedRecord = {
-                ...existingRecord,
-                ...updates,
-                amount: updates.amount ? Number(updates.amount) : existingRecord.amount,
-                updatedAt: new Date().toISOString()
-            };
-            if (!isValidRecord(updatedRecord)) {
-                console.error('updateRecord: invalid update data', updates);
-                return null;
-            }
-            records[index] = updatedRecord;
-            return updatedRecord;
-        },
-
-        deleteRecord(id) {
-            const index = records.findIndex(r => r.id === id);
-            if (index === -1) {
-                console.warn(`deleteRecord: record with id ${id} not found`);
-                return null;
-            }
-            const deletedRecords = records.splice(index, 1);
-            return deletedRecords[0];
-        },
-
-        deleteRecords(ids) {
-            const deleted = [];
-            records = records.filter(record => {
-                if (ids.includes(record.id)) {
-                    deleted.push(record);
-                    return false;
-                }
-                return true;
-            });
-            return deleted;
-        },
-
-        clearAllRecords() {
-            records = [];
-        },
-
-        getRecordCount() {
-            return records.length;
-        },
-
-        getTotalSpent() {
-            return records.reduce((sum, record) => sum + record.amount, 0);
-        },
-
-        debug() {
-            console.log('=== STATE DEBUG ===');
-            console.log('Records:', records.length);
-            console.log('Budget Cap:', budgetCap);
-            console.log('Total Spent:', this.getTotalSpent());
-            console.log('===================');
+    addRecord(fields) {
+        if (!fields || !fields.description || !fields.amount || !fields.category || !fields.date) {
+            return null;
         }
-    };
-})();
+        const now = new Date().toISOString();
+        const record = {
+            description: fields.description,
+            amount:      Number(fields.amount),
+            category:    fields.category,
+            date:        fields.date,
+            id:          generateId(),
+            createdAt:   now,
+            updatedAt:   now,
+        };
+        _records.push(record);
+        return deepCopyRecord(record);
+    },
+
+    updateRecord(id, updates) {
+        const index = _records.findIndex(r => r.id === id);
+        if (index === -1) return null;
+
+        const { id: _ignoredId, createdAt: _ignoredCreatedAt, ...safeUpdates } = updates;
+
+        _records[index] = {
+            ..._records[index],
+            ...safeUpdates,
+            updatedAt: new Date().toISOString(),
+        };
+        return deepCopyRecord(_records[index]);
+    },
+
+    deleteRecord(id) {
+        const index = _records.findIndex(r => r.id === id);
+        if (index === -1) return null;
+        const deleted = deepCopyRecord(_records[index]);
+        _records.splice(index, 1);
+        return deleted;
+    },
+
+    findRecord(id) {
+        const found = _records.find(r => r.id === id);
+        return found ? deepCopyRecord(found) : null;
+    },
+
+    clearAllRecords() {
+        _records.length = 0;
+    },
+
+    getEditingId() {
+        return _editingId;
+    },
+
+    setEditingId(id) {
+        _editingId = id || null;
+    },
+
+    clearEditingId() {
+        _editingId = null;
+    },
+
+    isEditing() {
+        return _editingId !== null;
+    },
+
+    getSettings() {
+        return { ..._settings, currency2: { ..._settings.currency2 }, currency3: { ..._settings.currency3 } };
+    },
+
+    getBudgetCap() {
+        return _settings.budgetCap;
+    },
+
+    setBudgetCap(cap) {
+        const parsed = Number(cap);
+        if (!Number.isFinite(parsed) || parsed < 0) return null;
+        _settings.budgetCap = parsed;
+        return _settings.budgetCap;
+    },
+
+    setCurrencies({ baseCurrency, currency2, currency3 }) {
+        if (baseCurrency) _settings.baseCurrency = String(baseCurrency).toUpperCase().slice(0, 3);
+        if (currency2?.code) _settings.currency2.code = String(currency2.code).toUpperCase().slice(0, 3);
+        if (Number.isFinite(Number(currency2?.rate))) _settings.currency2.rate = Number(currency2.rate);
+        if (currency3?.code) _settings.currency3.code = String(currency3.code).toUpperCase().slice(0, 3);
+        if (Number.isFinite(Number(currency3?.rate))) _settings.currency3.rate = Number(currency3.rate);
+    },
+
+    resetSettings() {
+        _settings = {
+            budgetCap:    500,
+            baseCurrency: 'USD',
+            currency2:    { code: 'EUR', rate: 0.92 },
+            currency3:    { code: 'KES', rate: 130 },
+        };
+    },
+
+    getTotalSpent() {
+        return _records.reduce((sum, r) => sum + r.amount, 0);
+    },
+
+    getTopCategory() {
+        if (_records.length === 0) return null;
+        const counts = {};
+        _records.forEach(r => {
+            counts[r.category] = (counts[r.category] || 0) + 1;
+        });
+        return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+    },
+
+    getRecordsInLastDays(days) {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - days);
+        return _records
+            .filter(r => new Date(r.date) >= cutoff)
+            .map(deepCopyRecord);
+    },
+
+};
