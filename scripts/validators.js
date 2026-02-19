@@ -1,139 +1,117 @@
-const Validators = (function() {
-    const CATEGORIES = ['Food', 'Transport', 'Books', 'Supplies', 'Entertainment', 'Other'];
+const CATEGORIES = ['Food', 'Books', 'Transport', 'Entertainment', 'Fees', 'Other'];
 
-    function hasDuplicateWords(text) {
-        const words = text.toLowerCase().split(/\s+/);
-        const seenWords = new Set();
-        for (const word of words) {
-            if (word.length <= 3) continue;
-            if (seenWords.has(word)) return true;
-            seenWords.add(word);
-        }
-        return false;
+const PATTERNS = {
+    description:    /^\S(?:(?!\s{2})[\s\S])*\S$|^\S$/,
+    amount:         /^(0|[1-9]\d*)(\.\d{1,2})?$/,
+    date:           /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/,
+    category:       /^[A-Za-z]+(?:[ -][A-Za-z]+)*$/,
+    duplicateWords: /\b(\w{4,})\b(?=.*\b\1\b)/i,
+};
+
+function parseLocalDate(dateString) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+}
+
+function validateDescription(value) {
+    if (!value || value.trim() === '') {
+        return { isValid: false, message: 'Description is required.' };
     }
-
-    function isSafeText(text) {
-        return !/[<>{}]/.test(text);
+    if (value.length < 3) {
+        return { isValid: false, message: 'Description must be at least 3 characters.' };
     }
+    if (value.length > 50) {
+        return { isValid: false, message: 'Description must be 50 characters or fewer.' };
+    }
+    if (!PATTERNS.description.test(value)) {
+        return { isValid: false, message: 'Description cannot start or end with a space, or contain consecutive spaces.' };
+    }
+    if (PATTERNS.duplicateWords.test(value)) {
+        return { isValid: false, message: 'Description contains a repeated word — try being more specific.' };
+    }
+    return { isValid: true, message: '' };
+}
 
-    return {
-        validateDescription(value) {
-            if (!value || value.trim() === '') {
-                return { isValid: false, message: 'Description is required' };
-            }
-            const trimmed = value.trim();
-            if (trimmed.length < 3) {
-                return { isValid: false, message: 'Description must be at least 3 characters' };
-            }
-            if (trimmed.length > 50) {
-                return { isValid: false, message: 'Description must be less than 50 characters' };
-            }
-            if (!isSafeText(trimmed)) {
-                return { isValid: false, message: 'Description contains invalid characters' };
-            }
-            if (hasDuplicateWords(trimmed)) {
-                return { isValid: false, message: 'Description contains duplicate words (try to be more specific)' };
-            }
-            return { isValid: true, message: '' };
-        },
+function validateAmount(value) {
+    if (value === undefined || value === null || value === '') {
+        return { isValid: false, message: 'Amount is required.' };
+    }
+    const raw = String(value).trim();
+    if (!PATTERNS.amount.test(raw)) {
+        return { isValid: false, message: 'Amount must be a positive number with up to 2 decimal places.' };
+    }
+    const amount = Number(raw);
+    if (amount <= 0) {
+        return { isValid: false, message: 'Amount must be greater than 0.' };
+    }
+    if (amount > 1_000_000) {
+        return { isValid: false, message: 'Amount cannot exceed $1,000,000.' };
+    }
+    return { isValid: true, message: '' };
+}
 
-        validateAmount(value) {
-            if (value === undefined || value === null || value === '') {
-                return { isValid: false, message: 'Amount is required' };
-            }
-            const amount = Number(value);
-            if (isNaN(amount)) {
-                return { isValid: false, message: 'Amount must be a number' };
-            }
-            if (amount <= 0) {
-                return { isValid: false, message: 'Amount must be greater than 0' };
-            }
-            if (amount > 1000000) {
-                return { isValid: false, message: 'Amount cannot exceed $1,000,000' };
-            }
-            const valueString = value.toString();
-            if (valueString.includes('.')) {
-                const decimalPlaces = valueString.split('.')[1].length;
-                if (decimalPlaces > 2) {
-                    return { isValid: false, message: 'Amount can only have up to 2 decimal places' };
-                }
-            }
-            return { isValid: true, message: '' };
-        },
+function validateDate(value) {
+    if (!value) {
+        return { isValid: false, message: 'Date is required.' };
+    }
+    if (!PATTERNS.date.test(value)) {
+        return { isValid: false, message: 'Date must be in YYYY-MM-DD format.' };
+    }
+    const [year] = value.split('-').map(Number);
+    if (year < 2000) {
+        return { isValid: false, message: 'Date must be from the year 2000 or later.' };
+    }
+    const inputDate = parseLocalDate(value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (inputDate > today) {
+        return { isValid: false, message: 'Date cannot be in the future.' };
+    }
+    return { isValid: true, message: '' };
+}
 
-        validateDate(value) {
-            if (!value) {
-                return { isValid: false, message: 'Date is required' };
-            }
-            const date = new Date(value);
-            if (isNaN(date.getTime())) {
-                return { isValid: false, message: 'Please enter a valid date' };
-            }
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const inputDate = new Date(value);
-            inputDate.setHours(0, 0, 0, 0);
-            if (inputDate > today) {
-                return { isValid: false, message: 'Date cannot be in the future' };
-            }
-            return { isValid: true, message: '' };
-        },
+function validateCategory(value) {
+    if (!value) {
+        return { isValid: false, message: 'Please select a category.' };
+    }
+    if (!CATEGORIES.includes(value)) {
+        return { isValid: false, message: 'Please select a valid category.' };
+    }
+    return { isValid: true, message: '' };
+}
 
-        validateCategory(value) {
-            if (!value) {
-                return { isValid: false, message: 'Please select a category' };
-            }
-            if (!CATEGORIES.includes(value)) {
-                return { isValid: false, message: 'Please select a valid category' };
-            }
-            return { isValid: true, message: '' };
-        },
+export const validators = {
 
-        validateForm(formData) {
-            const errors = {};
-            let isValid = true;
+    PATTERNS,
 
-            const descValidation = this.validateDescription(formData.description);
-            if (!descValidation.isValid) {
-                errors.description = descValidation.message;
+    getCategories() {
+        return [...CATEGORIES];
+    },
+
+    validateDescription,
+    validateAmount,
+    validateDate,
+    validateCategory,
+
+    validateForm(formData) {
+        const results = {
+            description: validateDescription(formData.description),
+            amount:      validateAmount(formData.amount),
+            date:        validateDate(formData.date),
+            category:    validateCategory(formData.category),
+        };
+
+        const errors = {};
+        let isValid = true;
+
+        for (const [field, result] of Object.entries(results)) {
+            if (!result.isValid) {
+                errors[field] = result.message;
                 isValid = false;
             }
-
-            const amountValidation = this.validateAmount(formData.amount);
-            if (!amountValidation.isValid) {
-                errors.amount = amountValidation.message;
-                isValid = false;
-            }
-
-            const dateValidation = this.validateDate(formData.date);
-            if (!dateValidation.isValid) {
-                errors.date = dateValidation.message;
-                isValid = false;
-            }
-
-            const categoryValidation = this.validateCategory(formData.category);
-            if (!categoryValidation.isValid) {
-                errors.category = categoryValidation.message;
-                isValid = false;
-            }
-
-            return { isValid, errors };
-        },
-
-        validateSearchTerm(term) {
-            if (!term || term.trim() === '') {
-                return { isValid: true, message: '' };
-            }
-            try {
-                new RegExp(term);
-                return { isValid: true, message: '' };
-            } catch (e) {
-                return { isValid: false, message: 'Invalid search pattern: ' + e.message };
-            }
-        },
-
-        getCategories() {
-            return [...CATEGORIES];
         }
-    };
-})();
+
+        return { isValid, errors };
+    },
+
+};
