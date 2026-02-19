@@ -1,154 +1,104 @@
-const Storage = (function() {
-    const STORAGE_KEY = 'student_finance_tracker';
-    const CAP_KEY = 'budget_cap_backup';
+const STORAGE_KEY = 'sft:data';
+const VERSION     = '1.1';
 
-    function isStorageAvailable() {
+const DEFAULTS = {
+    records:  [],
+    settings: {
+        budgetCap:    500,
+        baseCurrency: 'USD',
+        currency2:    { code: 'EUR', rate: 0.92 },
+        currency3:    { code: 'KES', rate: 130  },
+    },
+};
+
+let _available = null;
+
+function isAvailable() {
+    if (_available !== null) return _available;
+    try {
+        const k = '__sft_test__';
+        localStorage.setItem(k, k);
+        localStorage.removeItem(k);
+        _available = true;
+    } catch {
+        _available = false;
+    }
+    return _available;
+}
+
+function isValidShape(data) {
+    return (
+        data !== null &&
+        typeof data === 'object' &&
+        (data.records  === undefined || Array.isArray(data.records)) &&
+        (data.settings === undefined || typeof data.settings === 'object')
+    );
+}
+
+export const storage = {
+
+    save({ records, settings }) {
+        if (!isAvailable()) return { ok: false, reason: 'unavailable' };
         try {
-            const test = '__storage_test__';
-            localStorage.setItem(test, test);
-            localStorage.removeItem(test);
-            return true;
-        } catch (e) {
-            console.error('localStorage is not available:', e);
-            return false;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                records,
+                settings,
+                version:     VERSION,
+                lastUpdated: new Date().toISOString(),
+            }));
+            return { ok: true };
+        } catch (err) {
+            if (err.name === 'QuotaExceededError') return { ok: false, reason: 'quota' };
+            return { ok: false, reason: 'unknown' };
         }
-    }
+    },
 
-    function isValidStoredData(data) {
-        return (
-            data &&
-            typeof data === 'object' &&
-            (data.records === undefined || Array.isArray(data.records)) &&
-            (data.budgetCap === undefined || typeof data.budgetCap === 'number')
-        );
-    }
+    load() {
+        if (!isAvailable()) return { ...DEFAULTS, corrupted: false };
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return { ...DEFAULTS, corrupted: false };
 
-    return {
-        saveData(records, budgetCap) {
-            if (!isStorageAvailable()) {
-                alert('Warning: localStorage is not available. Your data will not persist after closing the browser.');
-                return false;
-            }
-            try {
-                const dataToStore = {
-                    records: records,
-                    budgetCap: budgetCap,
-                    lastUpdated: new Date().toISOString(),
-                    version: '1.0'
-                };
-                const jsonString = JSON.stringify(dataToStore);
-                localStorage.setItem(STORAGE_KEY, jsonString);
-                console.log(`Data saved: ${records.length} records`);
-                return true;
-            } catch (error) {
-                if (error.name === 'QuotaExceededError') {
-                    alert('Storage quota exceeded. Try deleting some records.');
-                } else {
-                    console.error('Error saving to localStorage:', error);
-                }
-                return false;
-            }
-        },
+            const parsed = JSON.parse(raw);
 
-        loadData() {
-            const defaults = { records: [], budgetCap: 500 };
-            if (!isStorageAvailable()) {
-                console.warn('localStorage not available, using defaults');
-                return defaults;
-            }
-            try {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (!stored) {
-                    console.log('No saved data found, using defaults');
-                    return defaults;
-                }
-                const parsed = JSON.parse(stored);
-                if (!isValidStoredData(parsed)) {
-                    console.error('Invalid data structure in localStorage');
-                    return defaults;
-                }
-                return {
-                    records: Array.isArray(parsed.records) ? parsed.records : [],
-                    budgetCap: typeof parsed.budgetCap === 'number' ? parsed.budgetCap : 500
-                };
-            } catch (error) {
-                console.error('Error loading from localStorage:', error);
+            if (!isValidShape(parsed)) {
                 localStorage.removeItem(STORAGE_KEY);
-                return defaults;
+                return { ...DEFAULTS, corrupted: true };
             }
-        },
 
-        saveBudgetCap(cap) {
-            try {
-                localStorage.setItem(CAP_KEY, JSON.stringify(cap));
-                return true;
-            } catch (error) {
-                console.error('Error saving budget cap:', error);
-                return false;
-            }
-        },
-
-        loadBudgetCap() {
-            try {
-                const cap = localStorage.getItem(CAP_KEY);
-                return cap ? JSON.parse(cap) : 500;
-            } catch (error) {
-                console.error('Error loading budget cap:', error);
-                return 500;
-            }
-        },
-
-        exportData() {
-            const records = State.getRecords();
-            const budgetCap = State.getBudgetCap();
-            const exportObject = {
-                records: records,
-                budgetCap: budgetCap,
-                exportedAt: new Date().toISOString(),
-                version: '1.0'
+            return {
+                records:   Array.isArray(parsed.records)        ? parsed.records   : [],
+                settings:  typeof parsed.settings === 'object'  ? parsed.settings  : DEFAULTS.settings,
+                corrupted: false,
             };
-            return JSON.stringify(exportObject, null, 2);
-        },
-
-        importData(jsonString) {
-            try {
-                const imported = JSON.parse(jsonString);
-                if (!isValidStoredData(imported)) {
-                    throw new Error('Invalid data format');
-                }
-                return {
-                    records: imported.records || [],
-                    budgetCap: imported.budgetCap || 500
-                };
-            } catch (error) {
-                console.error('Error importing data:', error);
-                return null;
-            }
-        },
-
-        clearAll() {
-            try {
-                localStorage.removeItem(STORAGE_KEY);
-                localStorage.removeItem(CAP_KEY);
-                console.log('All storage cleared');
-            } catch (error) {
-                console.error('Error clearing storage:', error);
-            }
-        },
-
-        getStorageInfo() {
-            try {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                const size = stored ? new Blob([stored]).size : 0;
-                return {
-                    hasData: !!stored,
-                    sizeBytes: size,
-                    sizeKB: Math.round(size / 1024 * 100) / 100,
-                    lastUpdated: stored ? JSON.parse(stored).lastUpdated : null
-                };
-            } catch (error) {
-                return { error: error.message };
-            }
+        } catch {
+            localStorage.removeItem(STORAGE_KEY);
+            return { ...DEFAULTS, corrupted: true };
         }
-    };
-})();
+    },
+
+    clear() {
+        if (!isAvailable()) return;
+        localStorage.removeItem(STORAGE_KEY);
+    },
+
+    getInfo() {
+        if (!isAvailable()) {
+            return { available: false, hasData: false, sizeBytes: 0, sizeKB: 0, lastUpdated: null };
+        }
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const size = raw ? new Blob([raw]).size : 0;
+        let lastUpdated = null;
+        try {
+            if (raw) lastUpdated = JSON.parse(raw).lastUpdated ?? null;
+        } catch { }
+        return {
+            available:   true,
+            hasData:     !!raw,
+            sizeBytes:   size,
+            sizeKB:      Math.round(size / 1024 * 100) / 100,
+            lastUpdated,
+        };
+    },
+
+};
