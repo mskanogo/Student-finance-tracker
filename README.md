@@ -3,7 +3,7 @@
 A responsive, accessible single-page application for tracking student expenses. Built with vanilla HTML, CSS, and JavaScript — no frameworks or libraries.
 
 **Live demo:** https://www.loom.com/share/dbe91ed42b324ea3bdeb538f3ced237a
-
+**App URL:** https://mskanogo.github.io/Student-finance-tracker/
 ---
 
 ## Overview
