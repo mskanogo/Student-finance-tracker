@@ -92,6 +92,7 @@ body {
     box-shadow: var(--shadow-md);
 }
 
+/* Sidebar hidden by default — toggled via JS on all screen sizes */
 body.sidebar-closed #sidebar {
     transform: translateX(calc(-1 * var(--sidebar-width)));
 }
@@ -825,30 +826,24 @@ footer {
 .hidden  { display: none !important; }
 .visible { display: block !important; }
 
+/* ── Tablet and up (768px+) ───────────────────────────────────────────────── */
+/* Sidebar pushes content rather than overlaying it.                          */
+/* Toggle still works — overlay is hidden because content shifts instead.     */
 @media (min-width: 768px) {
 
-    #sidebar {
-        transform: translateX(0);
-    }
-
-    #main-wrapper {
+    /* When sidebar is open, push main content to the right */
+    body:not(.sidebar-closed) #main-wrapper {
         margin-left: var(--sidebar-width);
     }
 
-    body.sidebar-closed #main-wrapper {
-        margin-left: 0;
-    }
-
+    /* No dark overlay on desktop — content pushes instead */
     #overlay {
         display: none !important;
     }
 
-    body:not(.sidebar-closed) #sidebar-open {
-        display: none;
-    }
-
 }
 
+/* ── Desktop (1024px+) ────────────────────────────────────────────────────── */
 @media (min-width: 1024px) {
 
     .stats-grid {
@@ -865,6 +860,7 @@ footer {
 
 }
 
+/* ── Very small screens (360px and below) ────────────────────────────────── */
 @media (max-width: 360px) {
 
     .stat-value {
