@@ -891,3 +891,17 @@ footer {
     }
 
 }
+
+nav {
+    position: fixed;
+    left: -250px;
+    top: 0;
+    width: 250px;
+    height: 100%;
+    transition: left 0.3s ease-in-out;
+    z-index: 999;
+}
+
+nav.open {
+    left: 0;
+}
