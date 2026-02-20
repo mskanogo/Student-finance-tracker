@@ -362,3 +362,24 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const nav = document.querySelector("nav");
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.innerHTML = "☰";
+    toggleBtn.style.position = "fixed";
+    toggleBtn.style.top = "15px";
+    toggleBtn.style.left = "15px";
+    toggleBtn.style.zIndex = "1000";
+    toggleBtn.style.padding = "8px 12px";
+    toggleBtn.style.cursor = "pointer";
+
+    document.body.appendChild(toggleBtn);
+
+    toggleBtn.addEventListener("click", function () {
+        nav.classList.toggle("open");
+    });
+
+});
