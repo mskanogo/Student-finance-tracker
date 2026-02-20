@@ -2,7 +2,7 @@
 
 A responsive, accessible single-page application for tracking student expenses. Built with vanilla HTML, CSS, and JavaScript — no frameworks or libraries.
 
-**Live demo:** https://www.loom.com/share/1449462bc6644393824e2af912e1286c
+**Live demo:** https://www.loom.com/share/dbe91ed42b324ea3bdeb538f3ced237a
 
 ---
 
@@ -290,7 +290,7 @@ If the stored data fails shape validation on load it is discarded and the app st
 
 ## Demo Video
 
-[Add your video link here before submission]
+https://www.loom.com/share/dbe91ed42b324ea3bdeb538f3ced237a
 
 The video covers:
 - Keyboard-only navigation through the full app
